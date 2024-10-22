@@ -1,0 +1,18 @@
+.header {
+    background-color: #f8f9fa; /* Color de fondo del header */
+    padding: 15px; /* Espaciado interno */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra del header */
+    position: relative;
+}
+
+.logout-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.nav-links {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}

@@ -13,36 +13,39 @@ class AuthController extends Controller
     {
         return view('auth.login-alumno');
     }
-
-    // Procesar el login de Alumno
     public function loginAlumno(Request $request)
     {
         // Validar los campos de entrada
         $request->validate([
             'email' => 'required|email',
-            'numero_documento' => 'required',
+            'numero_documento' => 'required|min:8|max:12',
         ]);
 
-        // Verificar las credenciales del alumno
-        $alumno = Alumno::where('alu_email', $request->email)
-                        ->where('alu_numero_documento', $request->numero_documento)
-                        ->first();
+        // Verificar si el alumno existe en la base de datos por su email
+        $alumno = Alumno::where('alu_email', $request->email)->first();
 
-        if ($alumno) {
-            auth()->login($alumno);
-            return redirect()->route('dashboard.alumno');  // Redirigir al dashboard del alumno
+        if (!$alumno) {
+            return back()->withErrors(['message' => 'Usuario no existe, revise bien sus datos']);
         }
 
-        return back()->withErrors(['message' => 'Credenciales incorrectas']);
+        // Verificar si el número de documento coincide con el del alumno
+        if ($alumno->alu_numero_documento !== $request->numero_documento) {
+            return back()->withErrors(['message' => 'Número de documento incorrecto']);
+        }
+
+        // Iniciar sesión manualmente
+        session(['alumno_id' => $alumno->id]); // Almacena el ID del alumno en la sesión
+
+        return redirect()->route('dashboard.alumno')->with('success', 'Logeado correctamente');  // Redirigir al dashboard del alumno
     }
+
+
 
     // Mostrar el formulario de login de Institución
     public function showInstitucionLoginForm()
     {
         return view('auth.login-institucion');
     }
-
-    // Procesar el login de Institución
     public function loginInstitucion(Request $request)
     {
         // Validar los campos de entrada
@@ -51,16 +54,37 @@ class AuthController extends Controller
             'telefono' => 'required',
         ]);
 
-        // Verificar las credenciales de la institución
-        $institucion = Institucion::where('ins_email', $request->email)
-                                  ->where('ins_telefono', $request->telefono)
-                                  ->first();
+        // Verificar si la institución existe en la base de datos por su email
+        $institucion = Institucion::where('ins_email', $request->email)->first();
 
-        if ($institucion) {
-            auth()->login($institucion);
-            return redirect()->route('dashboard.institucion');  // Redirigir al dashboard de la institución
+        if (!$institucion) {
+            // Si no existe la institución con el email proporcionado
+            return back()->withErrors(['message' => 'Institución no existe, revise bien sus datos']);
         }
 
-        return back()->withErrors(['message' => 'Credenciales incorrectas']);
+        // Verificar si el teléfono coincide con el de la institución
+        if ($institucion->ins_telefono !== $request->telefono) {
+            // Si el teléfono no coincide
+            return back()->withErrors(['message' => 'Número de teléfono incorrecto']);
+        }
+
+        // Si todo es correcto, proceder con la autenticación
+        auth()->login($institucion);
+        return redirect()->route('dashboard.institucion');  // Redirigir al dashboard de la institución
+    }
+    public function showAlumnoDashboard()
+    {
+        return view('dashboard.alumno'); // Asegúrate de que esto coincide con la ruta del archivo
+    }
+    public function showInstitucionDashboard()
+    {
+        return view('dashboard.institucion');  // Redirige a la vista del dashboard de institución
+    }
+    public function logout(Request $request)
+    {
+        // Cerrar sesión del usuario
+        $request->session()->forget('alumno_id'); // Elimina el ID del alumno de la sesión
+
+        return redirect()->route('login.alumno'); // Redirige a la página de inicio de sesión
     }
 }

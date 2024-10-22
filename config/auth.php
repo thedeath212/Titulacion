@@ -40,6 +40,16 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'alumno' => [ // Definición del guardia para alumnos
+            'driver' => 'session',
+            'provider' => 'alumnos',
+        ],
+
+        'institucion' => [ // Definición del guardia para instituciones
+            'driver' => 'session',
+            'provider' => 'instituciones',
+        ],
     ],
 
     /*
@@ -65,10 +75,15 @@ return [
             'model' => App\Models\User::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'alumnos' => [ // Proveedor para alumnos
+            'driver' => 'eloquent',
+            'model' => App\Models\Alumno::class,
+        ],
+
+        'instituciones' => [ // Proveedor para instituciones
+            'driver' => 'eloquent',
+            'model' => App\Models\Institucion::class,
+        ],
     ],
 
     /*
